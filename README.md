@@ -22,7 +22,7 @@ Existing PDE discovery methods (PDE-FIND, SINDy) assume direct access to spatiot
 4. **Differentiable PDE Solver** — Validates coefficients by forward integration (ETDRK4 / split-step Fourier), converting the noise-amplifying differentiation problem into a noise-attenuating integration problem
 
 <p align="center">
-  <img src="untitled folder/high-level.pdf" alt="VIPER pipeline" width="700"/>
+  <img src="figures/pipeline.png" alt="VIPER pipeline" width="700"/>
 </p>
 
 ## Key Results
@@ -71,7 +71,15 @@ VIPER recovers coefficients from as little as **20% spatial coverage**, a regime
 
 ## Installation
 
+```bash
+git clone https://github.com/ImpactLabASU/VIPER-CVPR2026.git
+cd VIPER-CVPR2026
 
+# (recommended) create an isolated environment
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+pip install -r requirements.txt
+```
 
 ### Requirements
 
@@ -85,15 +93,72 @@ VIPER recovers coefficients from as little as **20% spatial coverage**, a regime
 
 ### Full Pipeline
 
+The end-to-end pipeline runs in five stages. A pre-shipped copy of the generated
+data lives in `data/`; re-run steps 1-2 only if you want to regenerate it.
 
+```bash
+# Run everything (generate -> render -> experiments -> tables)
+bash run_experiments.sh
+```
+
+Or run each stage manually:
+
+```bash
+# 1. Generate ground-truth PDE simulations -> data/simulations/
+python experiments/generate_simulations.py --all
+
+# 2. Render simulations to RGB video -> data/videos/
+python experiments/render_videos.py --all
+
+# 3. Run experiments (results written to results/)
+python experiments/exp1_clean.py                              # clean video
+python experiments/exp2_noisy.py --noise gaussian --level 0.05 # 5% Gaussian noise
+python experiments/exp3_implicit.py                            # partial spatial observability
+
+# 4. Ablation
+python experiments/exp4_ablation.py --ablation hidden --pde burgers
+
+# 5. Aggregate results into tables -> results/tables/
+python experiments/generate_results.py
+```
+
+All scripts resolve paths relative to the repository root, so they can be run
+from anywhere.
 
 ## Project Structure
 
-
+```
+VIPER-CVPR2026/
+├── simp_video/                 # core package
+│   ├── models/
+│   │   ├── simp_v.py           # VIPER model (LTC encoder + differentiable solver)
+│   │   └── baselines/          # PDE-FIND, DeepMoD, PINN-inverse, DeLFYS
+│   └── utils/                  # PDE solvers, metrics, video extract/render (2D + 3D)
+├── experiments/                # experiment + data-generation scripts
+├── configs/
+│   └── experiment_configs.yaml # PDE, video, noise, training settings
+├── data/                       # generated simulations (.npz) and videos (.mp4)
+├── results/                    # experiment outputs (JSON/CSV) and tables
+├── figures/                    # paper figures
+├── requirements.txt
+└── run_experiments.sh          # full pipeline driver
+```
 
 ## Training Hyperparameters
 
+Defined in `configs/experiment_configs.yaml`.
 
+| Hyperparameter | Value |
+|----------------|-------|
+| LTC units | 64 |
+| Learning rate | 5e-4 |
+| Max epochs | 500 |
+| Early-stop patience | 100 |
+| Batch size | 1 |
+| Sparsity weight (lambda) | 1e-3 |
+| Seeds | 42, 123, 456, 789, 1011 |
+
+Video rendering: 256x128 resolution, 30 fps, `viridis` colormap, H.264 (`libx264`).
 
 ## Acknowledgments
 

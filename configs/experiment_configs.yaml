@@ -1,0 +1,75 @@
+# SIMP-V Experiment Configurations
+# Spatial Implicit PDE discovery from Video
+
+pde_configs:
+  kdv:
+    equation: "u_t + alpha*u*u_x + beta*u_xxx = 0"
+    true_coeffs: {alpha: 6.0, beta: 1.0}
+    coeff_order: [alpha, beta]
+    domain: {L: 20, nx: 128}
+    time: {T: 10, dt: 0.01}
+    ic: "sech_soliton"  # 2*sech(x)^2
+    bc: "periodic"
+
+  burgers:
+    equation: "u_t + u*u_x = nu*u_xx"
+    true_coeffs: {nu: 0.1}
+    coeff_order: [nu]
+    domain: {L: 8, nx: 128}
+    time: {T: 2, dt: 0.005}
+    ic: "sinusoidal"  # -sin(pi*x)
+    bc: "periodic"
+
+  ks:
+    equation: "u_t + u*u_x + u_xx + nu*u_xxxx = 0"
+    true_coeffs: {nu: 1.0}
+    coeff_order: [nu]
+    domain: {L: 64, nx: 128}
+    time: {T: 50, dt: 0.05}
+    ic: "cos_perturbed"
+    bc: "periodic"
+
+  schrodinger:
+    equation: "i*u_t + alpha*u_xx = 0"
+    true_coeffs: {alpha: 0.5}
+    coeff_order: [alpha]
+    domain: {L: 20, nx: 128}
+    time: {T: 5, dt: 0.01}
+    ic: "gaussian_phase"
+    bc: "periodic"
+
+  nls:
+    equation: "i*u_t + alpha*u_xx + beta*|u|^2*u = 0"
+    true_coeffs: {alpha: 0.5, beta: 1.0}
+    coeff_order: [alpha, beta]
+    domain: {L: 20, nx: 128}
+    time: {T: 5, dt: 0.01}
+    ic: "sech"
+    bc: "periodic"
+
+video_configs:
+  resolution: [256, 128]  # width, height
+  fps: 30
+  colormap: "viridis"
+  format: "mp4"
+  codec: "libx264"
+
+noise_configs:
+  gaussian: [0.0, 0.01, 0.05, 0.10]
+  salt_pepper_p: [0.0, 0.01, 0.05]
+  blur_kernel: [0, 3, 5, 7]
+  compression_crf: [18, 23, 28, 35]
+
+implicit_configs:
+  coverage: [0.2, 0.4, 0.6, 0.8, 1.0]
+  pattern: ["random", "block", "periodic"]
+
+training_configs:
+  ltc_units: 64
+  learning_rate: 0.0005
+  max_epochs: 500
+  patience: 100
+  batch_size: 1
+  sparsity_lambda: 0.001
+
+seeds: [42, 123, 456, 789, 1011]

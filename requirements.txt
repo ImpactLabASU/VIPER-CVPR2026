@@ -1,0 +1,14 @@
+# SIMP-V: Spatial Implicit PDE discovery from Video
+# CVPR Workshop Experiments
+
+torch>=1.10
+numpy>=1.20
+scipy>=1.7
+matplotlib>=3.4
+pyyaml>=5.4
+
+# Optional: LTC networks (SIMP-V uses LTC when available)
+ncps>=0.0.4
+
+# Optional: Video I/O (for render/extract)
+opencv-python>=4.5
