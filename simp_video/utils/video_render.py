@@ -27,10 +27,16 @@ def render_field_to_video(
     vmin: Optional[float] = None,
     vmax: Optional[float] = None,
     fmt: str = "mp4",
+    subsample: bool = True,
 ) -> str:
     """
     Render u(nt, nx) to video.
-    
+
+    Each video frame encodes one time slice u(t_i, x) as a colormap strip with
+    the spatial coordinate x along the WIDTH (one column per grid point),
+    replicated down the height. This matches extract_field_from_video, which
+    reads x from the frame width and averages over height.
+
     Args:
         u: Field (nt, nx)
         x: Spatial grid
@@ -40,46 +46,52 @@ def render_field_to_video(
         fps: Frames per second
         colormap: Matplotlib colormap name
         vmin, vmax: Color scale limits
-    
+        subsample: If True (default, for viewable videos) sample n=duration*fps
+            frames evenly across [0, T]. If False, render one frame per time
+            step (no temporal loss) so the round-trip preserves dt for recovery.
+
     Returns:
         Path to saved video
     """
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-    
+
     if vmin is None:
         vmin = float(np.nanmin(u))
     if vmax is None:
         vmax = float(np.nanmax(u))
-    
-    # Subsample time to match fps and duration
+
     nt_total = u.shape[0]
-    duration_sec = t[-1] - t[0]
-    n_frames = int(duration_sec * fps)
-    if n_frames > nt_total:
+    if subsample:
+        # Sample n_frames evenly across the FULL [0, T] range (never the first-N).
+        duration_sec = t[-1] - t[0]
+        n_frames = max(1, int(duration_sec * fps))
         frame_indices = np.linspace(0, nt_total - 1, n_frames).astype(int)
     else:
-        frame_indices = np.arange(min(n_frames, nt_total))
-    
+        # Faithful: one frame per time step, preserves the true time cadence.
+        frame_indices = np.arange(nt_total)
+
     dpi = 100
     fig_w, fig_h = resolution[0] / dpi, resolution[1] / dpi
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi)
     ax.set_axis_off()
+    fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-    # Each frame: u(t_i, x) repeated vertically to fill resolution (width=nx, height=res_h)
-    frame0 = np.tile(u[0:1].T, (resolution[1], 1))  # (height, width)
+    # Each frame: u(t_i, x) with x along width, replicated over height.
+    frame0 = np.tile(u[0:1], (resolution[1], 1))  # (height, nx)
     im = ax.imshow(
         frame0,
         aspect="auto",
         cmap=colormap,
         vmin=vmin,
         vmax=vmax,
+        interpolation="nearest",
         extent=[x[0], x[-1], t[0], t[-1]],
         origin="lower",
     )
 
     def update(frame_idx):
         idx = frame_indices[min(frame_idx, len(frame_indices) - 1)]
-        frame = np.tile(u[idx : idx + 1].T, (resolution[1], 1))
+        frame = np.tile(u[idx : idx + 1], (resolution[1], 1))
         im.set_data(frame)
         return [im]
     

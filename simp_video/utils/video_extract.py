@@ -86,6 +86,10 @@ def extract_field_from_video(
     # Map [0,1] colormap values to [vmin, vmax]
     cmap_vals_scaled = vmin + cmap_vals * (vmax - vmin)
     
+    # cv2 frames are uint8 in [0, 255]; the colormap table is in [0, 1].
+    # Normalize pixels to [0, 1] so the nearest-color match is on the same scale.
+    frames = frames.astype(np.float64) / 255.0
+
     u_list = []
     for i in range(nt):
         u_frame = _rgb_to_scalar(frames[i], cmap_rgb, cmap_vals_scaled)

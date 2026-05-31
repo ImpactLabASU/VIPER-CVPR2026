@@ -125,6 +125,25 @@ python experiments/generate_results.py
 All scripts resolve paths relative to the repository root, so they can be run
 from anywhere.
 
+### Video Extraction + Coefficient Recovery
+
+`experiments/exp_video.py` runs the stage-1 **video** path end to end for a single
+PDE: it renders the field to an MP4, extracts `u(x,t)` back from the RGB frames by
+colormap inversion, recovers the coefficients with VIPER, and validates them by a
+forward `solve_pde`. (`exp1_clean.py` feeds the raw solver field directly; this
+script instead goes through the rendered video.)
+
+```bash
+# Render -> extract from video -> recover coefficients (single PDE)
+python experiments/exp_video.py --pde burgers
+python experiments/exp_video.py --pde kdv --seed 42 --max-epochs 500
+
+# Use an existing rendered MP4 instead of rendering one
+python experiments/exp_video.py --pde ks --video data/videos/ks_3d_seed42.mp4
+```
+
+PDE choices: `kdv`, `burgers`, `ks`, `schrodinger`, `nls`.
+
 ## Project Structure
 
 ```
