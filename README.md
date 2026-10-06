@@ -8,6 +8,8 @@
 **Authors:** Farhat Shaikh, Ayan Banerjee, Sandeep Gupta
 IMPACT Lab, School of Computing & Augmented Intelligence (SCAI), Arizona State University
 
+**Paper:** [CVF Open Access](https://openaccess.thecvf.com/content/CVPR2026W/WiCV/html/Shaikh_VIPER_Video-Informed_PDE_Extraction_and_Recovery_CVPRW_2026_paper.html) | [Supplementary](https://openaccess.thecvf.com/content/CVPR2026W/WiCV/supplemental/Shaikh_VIPER_Video-Informed_PDE_CVPRW_2026_supplemental.pdf)
+
 ---
 
 ## Overview
@@ -185,7 +187,22 @@ This project is partially funded by DARPA AMP-N6600120C4020, DARPA FIRE-P0000504
 
 ## Citation
 
+If you use this code, please cite:
 
+```bibtex
+@InProceedings{Shaikh_2026_CVPRW,
+  author    = {Shaikh, Farhat and Banerjee, Ayan
+               and Gupta, Sandeep},
+  title     = {{VIPER}: Video-Informed {PDE}
+               Extraction and Recovery},
+  booktitle = {Proceedings of the IEEE/CVF Conference
+               on Computer Vision and Pattern
+               Recognition (CVPR) Workshops},
+  month     = {June},
+  year      = {2026},
+  pages     = {604--612}
+}
+```
 
 ## License
 
